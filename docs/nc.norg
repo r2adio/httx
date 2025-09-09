@@ -1,0 +1,23 @@
+@document.meta
+title: netcat
+description: 
+authors: r2adio
+categories: 
+created: 2025-09-08T22:52:27+0530
+updated: 2025-09-08T23:04:28+0530
+version: 1.1.1
+@end
+
+* Netcat
+  - cmdline tool that reads and write data across network connection
+  - available on all unix-like systems
+
+** Common usecase of nc
+   ~ testing connectivity to a port
+   ~ port scanning
+   ~ creating a tcp server
+   ~ transferring files
+   ~ using udp
+
+** Use case
+   used [this]{nc -v localhost 42069} command to check the state of server running at port 42069.
