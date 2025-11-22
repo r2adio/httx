@@ -1,0 +1,16 @@
+#+title: nc
+#+description: 
+
+* Netcat
+  - cmdline tool that reads and write data across network connection
+  - available on all unix-like systems
+
+** Common usecase of nc
+   1. testing connectivity to a port
+   2. port scanning
+   3. creating a tcp server
+   4. transferring files
+   5. using udp
+
+** Use case
+   used [this]{nc -v localhost 42069} command to check the state of server running at port 42069.

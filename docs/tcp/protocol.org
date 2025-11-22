@@ -1,0 +1,34 @@
+#+title: protocol
+#+description: 
+
+* Network Protocol:
+  - set of rules for formatting and processing data.
+  - defines how devices communicate over network.
+  - governs how the data is broken down, formatted, transmitted, and recieved. 
+  - format of data: *Headers* and *Payload*
+
+* OSI Model:
+  1. Physical Layer  ->  transmits raw bit stream over physical medium
+  2. Datalink Layer  ->  defines format of data on network
+  3. Network Layer  ->  decides which physical path the data will take
+  4. Transport Layer  ->  transmits data using transmission protocols, TCP & UDP
+  5. Session Layer  ->  maintains connection, is responsible for controlling ports and sessinos
+  6. Presentaion Layer  ->  ensures that data is in usable format, here data encryption occurs
+  7. Application Layer  ->  human-computer interaction layer, here applications can access network service
+
+* Other protocols used over internet
+  1. TCP:
+    - Transport Layer Protocol, that ensures reliable data delivery.
+    - it's meant to be used w/ IP, often referenced as TCP/IP
+  2. HTTP:
+    - Hypertext Transfer Protocol, foundatin of WWW.
+    - belongs to Application Layer 
+  3. HTTPS:
+    - HTTP Secure, gives encryption to HTTP
+    - http isn't encrypted, an attacker can intercepts HTTP message and can read it.
+  4. TLS/SSL:
+    - Transport Layer Security is protocol HTTPS uses for encryption
+    - TLS used to be called Secure Sockets Layer
+  5. UDP:
+    - User Datagram Protocol, faster but less reliable alternative of TCP; at transport layer.
+    - use case: *video streaming* and *gaming*
