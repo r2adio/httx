@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
+	"net"
 )
 
 // getLinesReader returns a channel that will receive the lines of the file
@@ -50,14 +50,20 @@ func getLinesReader(f io.ReadCloser) <-chan string {
 }
 
 func main() {
-	f, err := os.Open("message.txt")
+	l, err := net.Listen("tcp", ":42069")
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	defer f.Close()
+	defer l.Close()
 
-	lines := getLinesReader(f)
-	for line := range lines {
-		fmt.Printf("%s\n", line)
+	// lines := getLinesReader(f)
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Fatalf("error: %v", err)
+		}
+		for line := range getLinesReader(conn) {
+			fmt.Println(line)
+		}
 	}
 }
