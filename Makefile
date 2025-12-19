@@ -1,9 +1,9 @@
 build:
-	@go build
+	@go build -o httx cmd/tcplistener/main.go
 	@./httx
 
 run:
-	@go run main.go
+	@go run cmd/tcplistener/main.go
 
 clean:
 	@rm httx

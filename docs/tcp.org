@@ -1,0 +1,42 @@
+#+title: TCP
+
+* what is TCP?
+  - TCP is a reliable, in-order, stream-based protocol.
+  - TCP is a connection-oriented protocol.
+    - connection is established between 2 devices.
+    - connection is closed when one device closes it.
+
+* how does TCP work?
+  - TCP connection is established between 2 devices.
+  - dev0 wants to send data to dev1. {eg: 8 packets}
+  - dev0 has 8 packets to send to dev1.
+  - on dev0, sliding window is created of set size. {eg: 4 packets}
+    - sliding window is a buffer of data that will be sent to dev1.
+    - sliding window contains the packets that are waiting to be sent at the moment.
+  - as the size of sliding window is of 4 packets, dev0 sends 4 packets to dev1 after ack.
+  - dev1 receives the first packet from dev0.
+  - in return, dev1 sends an ack to dev0.
+  - dev0 will receive the ack from dev1 at some point, after recieving ack sliding window will move forward.
+  - in the meantime, dev0 sends the rest of the packets from sliding window to dev1.
+
+* what is the difference between TCP and UDP?
+  1. reliability
+     - TCP ensures reliable delivery of data, and guarantees no data loss and no data duplication and w/ correct ordering.
+     - UDP can be unreliable, and can't guarantee data delivery, data loss, or data duplication.
+  2. ordering
+     - TCP delivers data to application in order, and out-of-order are reordered internally.
+     - UDP delivers data as received, and ordering is handled by the application.
+  3. data model
+     - TCP uses a byte-stream data model.
+     - UDP uses a message-oriented (datagram-based) data model.
+  4. speed and overhead
+     - TCP is slower than UDP, but is reliable.
+     - TCP has higher overhead than UDP.
+     - TCP having higher overhead, because of conn setup, acks, retransmissions, and state management.
+     - UDP is faster and low latency, thus ideal for time-sensitive applications.
+  5. header size
+     - TCP header size is 20 bytes (minimum size).
+     - UDP header size is 8 bytes.
+  6. use cases
+     - TCP: web browsing, file transfer, email, remote login, etc.
+     - UDP: real-time applications, VOIP, video streaming, dns queries, etc.

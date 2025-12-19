@@ -1,0 +1,28 @@
+#+title: Protocol and HTTP/1.1
+
+* what is the protocol?
+  - the protocol is design/spec for a some computer/device to communicate to another.
+
+* what does the protocol do?
+  - governs how the data is formatted, send, received, and processed.
+  - ensures 2 devices communicate efficiently even with hw/sw differences.
+  - acts as a bridge or standard that both devices understand and can communicate.
+
+* why does HTTP/1.1 uses TCP?
+  - TCP is a reliable, in-order, stream-based protocol.
+  - HTTP/1.1 is a request/response protocol.
+    - request is sent, response is received.
+    - request and response are in a stream.
+
+* what is the difference between HTTP/1.1 and HTTP/2?
+  - HTTP/1.1 is a request/response protocol.
+    - request is sent, response is received.
+    - request and response are in a stream.
+  - HTTP/2 is a request/response protocol.
+    - request is sent, response is received.
+    - request and response are not in a stream.
+      - request and response are multiplexed.
+      - multiple requests can be sent over a single TCP connection.
+      - multiple responses can be received over a single TCP connection.
+  - HTTP/2 is a binary protocol.
+    - request and response are binary.
