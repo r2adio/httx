@@ -17,22 +17,23 @@ type Request struct {
 }
 
 // request-line  = method SP request-target SP HTTP-version
-func parseRequestLine(line string) (*RequestLine, error) {
-	indx := strings.Index(line, "\r\n")
-	if indx == -1 {
-		return nil, nil
+func parseRequestLine(line string) (*RequestLine, string, error) {
+	before, after, ok := strings.Cut(line, "\r\n")
+	if !ok {
+		return nil, line, fmt.Errorf("invalid request line: %s", line)
 	}
 
-	startLine := line[:indx]
+	startLine := before
+	restOfMsg := after
 
 	parts := strings.Split(startLine, " ")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("invalid number of parts in request line: %s", startLine)
+		return nil, restOfMsg, fmt.Errorf("invalid number of parts in request line: %s", startLine)
 	}
 
-	return &RequestLine{
-		Method: parts[0], RequestTarget: parts[1], HttpVersion: parts[2],
-	}, nil
+	rL := &RequestLine{Method: parts[0], RequestTarget: parts[1], HttpVersion: parts[2]}
+
+	return rL, restOfMsg, nil
 }
 
 // parses the request line from the reader
