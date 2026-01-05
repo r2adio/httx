@@ -1,10 +1,16 @@
 package request
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"strings"
+)
+
+type parserState string
+
+const (
+	StateInit parserState = "init"
+	StateDone parserState = "done"
 )
 
 type RequestLine struct {
@@ -15,10 +21,15 @@ type RequestLine struct {
 
 type Request struct {
 	RequestLine RequestLine
+	state       parserState
 }
 
-// request-line  = method SP request-target SP HTTP-version
-func parseRequestLine(line string) (*RequestLine, string, error) {
+func newRequest() *Request {
+	return &Request{state: StateInit}
+}
+
+// request-line = method SP request-target SP HTTP-version
+func parseRequestLine(line string) (*RequestLine, int, error) {
 	before, after, ok := strings.Cut(line, "\r\n")
 	if !ok {
 		return nil, line, fmt.Errorf("invalid request line: %s", line)
@@ -50,18 +61,39 @@ func parseRequestLine(line string) (*RequestLine, string, error) {
 	return rL, restOfMsg, nil
 }
 
+func (r *Request) parse(buf []byte) (int, error) {
+	return 0, nil
+}
+
+func (r *Request) done() bool { return r.state == StateDone }
+
 // parses the request line from the reader
 func RequestFromReader(reader io.Reader) (*Request, error) {
-	data, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, errors.Join(fmt.Errorf("unable to read request line"), err)
+	request := newRequest()
+
+	// NOTE: header could overflow the buffer(1024 bytes)
+	// header or body could be more than 1k
+	buf := make([]byte, 1024)
+	bufLen := 0
+	for !request.done() {
+		n, err := reader.Read(buf[bufLen:])
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err // TODO: handle error
+		}
+
+		bufLen += n
+
+		readN, err := request.parse(buf[:bufLen])
+		if err != nil {
+			return nil, err
+		}
+
+		copy(buf, buf[readN:bufLen]) // shifts the remaining data to the beginning of the buffer
+		bufLen -= readN              // updates the buffer length
 	}
 
-	str := string(data)
-	rL, _, err := parseRequestLine(str)
-	if err != nil {
-		return nil, errors.Join(fmt.Errorf("unable to parse request line"), err)
-	}
-
-	return &Request{*rL}, err
+	return request, nil
 }
