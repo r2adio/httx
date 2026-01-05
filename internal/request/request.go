@@ -1,9 +1,9 @@
 package request
 
 import (
+	"bytes"
 	"fmt"
 	"io"
-	"strings"
 )
 
 type parserState string
@@ -29,36 +29,35 @@ func newRequest() *Request {
 }
 
 // request-line = method SP request-target SP HTTP-version
-func parseRequestLine(line string) (*RequestLine, int, error) {
-	before, after, ok := strings.Cut(line, "\r\n")
-	if !ok {
-		return nil, line, fmt.Errorf("invalid request line: %s", line)
+func parseRequestLine(buf []byte) (*RequestLine, int, error) {
+	idx := bytes.Index(buf, []byte("\r\n"))
+	if idx == -1 {
+		return nil, 0, fmt.Errorf("invalid request line: %s", buf)
 	}
+	reqLine := buf[:idx]
+	read := idx + 2 // +2 for \r\n
 
-	reqLine := before
-	restOfMsg := after
-
-	httparts := strings.Split(reqLine, " ") // method, request-target, HTTP-version
+	httparts := bytes.Split(reqLine, []byte(" ")) // method, request-target, HTTP-version
 	if len(httparts) != 3 {
-		return nil, restOfMsg, fmt.Errorf("invalid number of parts in request line: %s", reqLine)
+		return nil, 0, fmt.Errorf("invalid number of parts in request line: %s", reqLine)
 	}
 
-	if httparts[0] != "GET" && httparts[0] != "POST" && httparts[0] != "PUT" && httparts[0] != "DELETE" {
-		return nil, restOfMsg, fmt.Errorf("invalid method: %s", httparts[0])
+	if string(httparts[0]) != "GET" && string(httparts[0]) != "POST" && string(httparts[0]) != "PUT" && string(httparts[0]) != "DELETE" {
+		return nil, 0, fmt.Errorf("invalid method: %s", httparts[0])
 	}
 
-	if httparts[1] == "" {
-		return nil, restOfMsg, fmt.Errorf("empty request-target")
+	if httparts[1] == nil {
+		return nil, 0, fmt.Errorf("empty request-target")
 	}
 
-	httpartsV := strings.Split(httparts[2], "/") // protocol, its version
-	if len(httpartsV) != 2 || httpartsV[0] != "HTTP" || httpartsV[1] != "1.1" {
-		return nil, restOfMsg, fmt.Errorf("invalid HTTP version: %s", httparts[2])
+	httpartsV := bytes.Split(httparts[2], []byte("/")) // protocol, its version
+	if len(httpartsV) != 2 || string(httpartsV[0]) != "HTTP" || string(httpartsV[1]) != "1.1" {
+		return nil, 0, fmt.Errorf("invalid HTTP version: %s", httparts[2])
 	}
 
-	rL := &RequestLine{Method: httparts[0], RequestTarget: httparts[1], HttpVersion: httpartsV[1]}
+	rL := &RequestLine{Method: string(httparts[0]), RequestTarget: string(httparts[1]), HttpVersion: string(httpartsV[1])}
 
-	return rL, restOfMsg, nil
+	return rL, read, nil
 }
 
 func (r *Request) parse(buf []byte) (int, error) {
