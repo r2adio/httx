@@ -9,8 +9,9 @@ import (
 type parserState string
 
 const (
-	StateInit parserState = "init"
-	StateDone parserState = "done"
+	StateInit  parserState = "init"
+	StateDone  parserState = "done"
+	StateError parserState = "error"
 )
 
 type RequestLine struct {
@@ -32,7 +33,9 @@ func newRequest() *Request {
 func parseRequestLine(buf []byte) (*RequestLine, int, error) {
 	idx := bytes.Index(buf, []byte("\r\n"))
 	if idx == -1 {
-		return nil, 0, fmt.Errorf("invalid request line: %s", buf)
+		// return error as nil, because the request line might come in chunks
+		// thus have to wait more data to complete the request line
+		return nil, 0, nil
 	}
 	reqLine := buf[:idx]
 	read := idx + 2 // +2 for \r\n
@@ -61,10 +64,36 @@ func parseRequestLine(buf []byte) (*RequestLine, int, error) {
 }
 
 func (r *Request) parse(buf []byte) (int, error) {
-	return 0, nil
+	read := 0
+outer:
+	for !r.done() {
+		switch r.state {
+		case StateError:
+			return 0, fmt.Errorf("request in error state")
+
+		case StateInit:
+			rl, n, err := parseRequestLine(buf[read:])
+			if err != nil {
+				r.state = StateError
+				return 0, err
+			}
+			if n == 0 { // no data was read
+				break outer
+			}
+			r.RequestLine = *rl
+			read += n
+			r.state = StateDone
+
+		case StateDone:
+			break outer
+		}
+	}
+	return read, nil
 }
 
-func (r *Request) done() bool { return r.state == StateDone }
+func (r *Request) done() bool {
+	return r.state == StateDone || r.state == StateError
+}
 
 // parses the request line from the reader
 func RequestFromReader(reader io.Reader) (*Request, error) {
